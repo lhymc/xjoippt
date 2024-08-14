@@ -1,0 +1,52 @@
+#include <cstring>
+#include <iostream>
+#define int long long
+#define INF 0x3f3f3f3f3f3f3f3f
+using namespace std;
+int n, m, dp[507][507], s1, t1, s2, t2, u, v, w, path[507][507];
+
+void print(int x, int y) {
+    if (dp[x][y] == INF) {
+        cout << "-1\n";
+        return;
+    } else
+        cout << dp[x][y] << '\n';
+    int t = x;
+    cout << t;
+    while (t != y) {
+        t = path[t][y];
+        cout << ' ' << t;
+    }
+    cout << '\n';
+}
+
+signed main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0), cout.tie(0);
+    cin >> s1 >> t1 >> s2 >> t2 >> n >> m;
+    memset(dp, 0x3f, sizeof(dp));
+    memset(path, 0x3f, sizeof(path));
+    for (int i = 1; i <= n; i++)
+        dp[i][i] = 0;
+    for (int i = 0; i < m; i++) {
+        cin >> u >> v >> w;
+        if (u != v && dp[u][v] > w) { // 排除自环、重边
+            dp[u][v] = dp[v][u] = w;
+            path[u][v] = v;
+            path[v][u] = u;
+        }
+    }
+    for (int k = 1; k <= n; k++) // k枚举当前考虑到第k个点加入
+        for (int i = 1; i <= n; i++)
+            for (int j = 1; j <= n; j++)
+                if (dp[i][k] + dp[k][j] < dp[i][j]) {
+                    dp[i][j] = dp[i][k] + dp[k][j];
+                    path[i][j] = path[i][k];
+                } else if (dp[i][k] + dp[k][j] == dp[i][j] &&
+                           path[i][k] < path[i][j])
+                    path[i][j] = path[i][k];
+
+    print(s1, t1);
+    print(s2, t2);
+    return 0;
+} 

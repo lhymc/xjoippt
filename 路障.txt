@@ -1,0 +1,70 @@
+#include <iostream>
+#include <cstdio>
+#include <queue>
+#include <cstring>
+#include <algorithm>
+
+using namespace std;
+
+typedef pair<int, int> P;
+const int maxnode = 103, maxedge = 10003, INF = 1234567890;
+priority_queue<P, vector<P>, greater<P> > Q;
+int n, m, fir[maxnode], nxt[maxedge], cnt, pre[maxnode], Ans;
+int u[maxedge], v[maxedge], w[maxedge], dis[maxnode], bef;
+bool cut[maxnode][maxnode], flag;
+inline void addedge(int x, int y, int z) {
+    nxt[++cnt] = fir[x];
+    fir[x] = cnt;
+    u[cnt] = x, v[cnt] = y, w[cnt] = z;
+}
+inline void Dijkstra() {
+    Q.push(P(0, 1));
+    fill(dis+1, dis+1+n, INF);
+    dis[1] = 0;
+    P x;
+    int k;
+    while (!Q.empty()) {
+        x = Q.top();
+        Q.pop();
+        if(x.first > dis[x.second]) continue;
+        k = fir[x.second];
+        while (k != -1) {
+            if(cut[u[k]][v[k]]) {
+                if(dis[v[k]] > dis[u[k]] + w[k] + w[k]) {
+                    dis[v[k]] = dis[u[k]] + w[k] + w[k];
+                    Q.push(P(dis[v[k]], v[k]));
+                }
+            }
+            else if(dis[v[k]] > dis[u[k]] + w[k]) {
+                dis[v[k]] = dis[u[k]] + w[k];
+                if(!flag) pre[v[k]] = u[k];
+                Q.push(P(dis[v[k]], v[k]));
+            }
+            k = nxt[k];
+        }
+    }
+}
+
+int main() {
+    scanf("%d%d", &n, &m);
+    int x, y, z;
+    memset(fir, -1, sizeof(fir));
+    for(int i=1; i<=m; i++) {
+        scanf("%d%d%d", &x, &y, &z);
+        addedge(x, y, z);
+        addedge(y, x, z);
+    }
+    flag = false;
+    Dijkstra();
+    flag = true;
+    bef = dis[n];
+    for(int i=n; i!=1; i=pre[i]) {
+        cut[i][pre[i]] = 1;
+        cut[pre[i]][i] = 1;
+        Dijkstra();
+        cut[i][pre[i]] = 0;
+        cut[pre[i]][i] = 0;
+        Ans = max(Ans, dis[n]);
+    }
+    printf("%d", Ans-bef);
+} 
